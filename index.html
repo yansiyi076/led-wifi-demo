@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html data-page-node-id="h5YMpQpRHLUOR3wLPWDNJ2" lang="zh-CN">
+<head data-page-node-id="PoVlnnAUHn7NRoTT71ApB0">
+<script data-page-node-id="EHFL2Xoxp9mHGgiCO1UId0" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="gFbW2Ytt46oRroWtwCwa1V" charset="UTF-8">
+<meta data-page-node-id="HYvY7QmJqNGMIfzffYwBam" content="width=device-width, initial-scale=1.0" name="viewport">
+<title data-page-node-id="WOEQYpQb82GDtWFe77MW8M" data-pnid-children="0Uk3ThbOiFG54lyTYBPYMO">星闪开发板简易仿真器 · NearLink WS63 DevKit</title>
+<style data-page-node-id="41GGiUPiIRjMjto3mRUWHN" data-pnid-children="Cy49sWCW0W9X8gRuaiD0ak">
+  :root {
+    --bg: #060a10;
+    --panel: #0c131c;
+    --panel-2: #0f1926;
+    --line: #1b2736;
+    --text: #e6eef7;
+    --muted: #7d8fa3;
+    --cyan: #2ee6c8;
+    --cyan-deep: #0f9e8a;
+    --violet: #8b7ef8;
+    --amber: #ffb43a;
+    --green: #3ddc84;
+    --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    padding: 30px 28px 56px;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 520px at 10% -12%, rgba(46, 230, 200, .12), transparent 62%),
+      radial-gradient(820px 620px at 104% -6%, rgba(139, 126, 248, .12), transparent 58%),
+      linear-gradient(180deg, #070c13 0%, #060a10 40%, #04070b 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 1200px; margin: 0 auto; }
+
+  /* ---------- 顶部标题 ---------- */
+  .topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .title-main {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    background: linear-gradient(96deg, #ffffff 8%, #9ef2e2 52%, #8fb6ff 96%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .title-sub {
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    letter-spacing: .06em;
+  }
+  .title-sub b { color: #a7e9dd; font-weight: 600; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    letter-spacing: .08em;
+    color: #9fb4c7;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .025);
+  }
+  .badge i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  .badge.violet i { background: var(--violet); box-shadow: 0 0 8px var(--violet); }
+
+  /* ---------- 布局 ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.42fr) minmax(320px, .88fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .board-card {
+    padding: 20px;
+    border-radius: 26px;
+    border: 1px solid #1c2836;
+    background: linear-gradient(165deg, #101b27 0%, #0a121a 60%, #080e15 100%);
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
+  }
+
+  /* ---------- PCB 板 ---------- */
+  .board {
+    position: relative;
+    padding: 20px 20px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    background:
+      radial-gradient(120% 130% at 14% 0%, #175f4d 0%, #0d4438 42%, #082e28 72%, #06231f 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .16),
+      inset 0 -30px 60px -30px rgba(0, 0, 0, .8),
+      0 24px 44px -24px rgba(0, 0, 0, .9);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* 走线纹理 */
+  .board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(198, 255, 236, .045) 0 1px, transparent 1px 15px),
+      repeating-linear-gradient(0deg, rgba(198, 255, 236, .035) 0 1px, transparent 1px 15px);
+    -webkit-mask-image: radial-gradient(130% 130% at 50% 0%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(130% 130% at 50% 0%, #000 40%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .board > * { position: relative; z-index: 1; }
+
+  .screw {
+    position: absolute;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #cfd8dc, #6b7a7d 55%, #39474a 100%);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .45), 0 1px 2px rgba(0, 0, 0, .6);
+    z-index: 2;
+  }
+  .screw::after {
+    content: "";
+    position: absolute;
+    inset: 3.5px;
+    border-radius: 50%;
+    border-top: 1.5px solid rgba(0, 0, 0, .55);
+    transform: rotate(38deg);
+  }
+  .screw.tl { top: 10px; left: 10px; }
+  .screw.tr { top: 10px; right: 10px; }
+  .screw.bl { bottom: 10px; left: 10px; }
+  .screw.br { bottom: 10px; right: 10px; }
+
+  .board-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 2px 6px 14px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    background: linear-gradient(145deg, rgba(46, 230, 200, .22), rgba(46, 230, 200, .05));
+    border: 1px solid rgba(46, 230, 200, .35);
+    box-shadow: 0 0 14px rgba(46, 230, 200, .25);
+  }
+  .brand-mark svg { width: 15px; height: 15px; }
+  .brand-name {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    color: #d8f7ef;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .6);
+  }
+  .brand-sub {
+    display: block;
+    font-size: 9.5px;
+    letter-spacing: .16em;
+    color: rgba(214, 245, 236, .5);
+    margin-top: 2px;
+  }
+
+  .leds { display: flex; gap: 14px; align-items: center; }
+  .led-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .led {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #16302c;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), inset 0 0 4px rgba(0, 0, 0, .9);
+    transition: background .18s, box-shadow .18s;
+  }
+  .led[data-state="on"] {
+    background: var(--cyan);
+    box-shadow: 0 0 10px rgba(46, 230, 200, .95), 0 0 22px rgba(46, 230, 200, .45);
+  }
+  .led[data-state="on"].led-pwr {
+    background: var(--green);
+    box-shadow: 0 0 10px rgba(61, 220, 132, .95), 0 0 22px rgba(61, 220, 132, .4);
+  }
+  .led[data-state="blink"] {
+    background: #7ee8ff;
+    box-shadow: 0 0 10px rgba(126, 232, 255, .95), 0 0 22px rgba(126, 232, 255, .4);
+    animation: ledBlink .72s steps(1, end) infinite;
+  }
+  @keyframes ledBlink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: .12; } }
+  .led-label {
+    font-size: 8.5px;
+    letter-spacing: .12em;
+    color: rgba(220, 250, 242, .55);
+    font-family: var(--mono);
+  }
+
+  /* ---------- LED 点阵屏 ---------- */
+  .screen-module {
+    padding: 11px 11px 9px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #121a1c, #0a1012);
+    border: 1px solid rgba(0, 0, 0, .7);
+    box-shadow:
+      0 10px 24px -12px rgba(0, 0, 0, .95),
+      inset 0 1px 0 rgba(255, 255, 255, .07);
+  }
+  .glass {
+    position: relative;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #04090b;
+    box-shadow:
+      inset 0 0 0 1px rgba(46, 230, 200, .14),
+      inset 0 0 46px rgba(0, 0, 0, .95);
+  }
+  #matrix { display: block; width: 100%; height: auto; }
+  .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, .075) 0%, rgba(255, 255, 255, 0) 34%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px);
+    opacity: .85;
+  }
+  .screen-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 0 2px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    color: rgba(190, 226, 220, .48);
+  }
+  .state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(46, 230, 200, .22);
+    background: rgba(46, 230, 200, .07);
+    color: #8fe6d6;
+    font-size: 9.5px;
+    letter-spacing: .08em;
+  }
+  .state-pill::before {
+    content: "";
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .state-pill.idle { color: #8aa0b4; border-color: rgba(138, 160, 180, .22); background: rgba(138, 160, 180, .07); }
+  .state-pill.burn { color: var(--amber); border-color: rgba(255, 180, 58, .3); background: rgba(255, 180, 58, .09); }
+  .state-pill.burn::before { animation: ledBlink .8s steps(1, end) infinite; }
+  .state-pill.run { color: var(--cyan); }
+
+  /* ---------- 烧录进度 ---------- */
+  .burn-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 13px;
+    padding: 0 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: rgba(206, 242, 234, .72);
+  }
+  .burn-row .label { min-width: 116px; white-space: nowrap; }
+  .burn-track {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .45);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .8), inset 0 0 0 1px rgba(255, 255, 255, .05);
+    overflow: hidden;
+  }
+  .burn-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0f9e8a, #2ee6c8 60%, #a9fff0);
+    box-shadow: 0 0 10px rgba(46, 230, 200, .7);
+    transition: width .12s linear;
+  }
+  .burn-pct { min-width: 42px; text-align: right; color: #9df0e0; }
+
+  /* ---------- 板载按钮区 ---------- */
+  .board-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .chip-group { display: flex; align-items: center; gap: 10px; }
+  .chip-body {
+    width: 58px; height: 46px;
+    border-radius: 4px;
+    display: grid; place-items: center;
+    background: linear-gradient(160deg, #1b232a, #0b1013);
+    border: 1px solid rgba(255, 255, 255, .12);
+    box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .10);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .05em;
+    color: #b9c8d2;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .chip-body small { display: block; font-size: 7px; color: #6f838f; letter-spacing: .1em; }
+  .chip-pins {
+    display: grid;
+    grid-template-columns: repeat(2, 3px);
+    gap: 3px 16px;
+  }
+  .chip-pins i { width: 3px; height: 2px; background: rgba(230, 200, 140, .5); border-radius: 1px; }
+
+  .btn-group { display: flex; gap: 10px; }
+  .hwbtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 104px;
+    padding: 12px 18px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .03));
+    color: #dff7f0;
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 8px 18px -10px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .22);
+    transition: transform .12s ease, box-shadow .18s ease, background .18s ease, opacity .18s;
+  }
+  .hwbtn:hover:not(:disabled) { transform: translateY(-1px); }
+  .hwbtn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .6); }
+  .hwbtn:disabled { opacity: .45; cursor: not-allowed; }
+  .hwbtn .ico { font-size: 13px; line-height: 1; opacity: .95; }
+  .hwbtn.flash {
+    background: linear-gradient(180deg, #47f0d4, #10a894);
+    border-color: rgba(180, 255, 244, .5);
+    color: #04241f;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+    box-shadow: 0 10px 24px -12px rgba(46, 230, 200, .9), inset 0 1px 0 rgba(255, 255, 255, .5);
+  }
+  .hwbtn.flash:hover:not(:disabled) { box-shadow: 0 14px 30px -12px rgba(46, 230, 200, 1), inset 0 1px 0 rgba(255, 255, 255, .55); }
+  .hwbtn.flash .ico { animation: none; }
+  .hwbtn.flash[data-busy="1"] .ico { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .foot-label {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: .14em;
+    color: rgba(214, 245, 236, .4);
+    text-align: center;
+    margin-top: 5px;
+  }
+
+  /* ---------- 板载规格条 ---------- */
+  .board-specs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin: 16px 2px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1a2734;
+    background: #1a2734;
+  }
+  .spec {
+    padding: 11px 13px;
+    background: linear-gradient(170deg, #0b131c, #080e15);
+  }
+  .spec span {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: #5b7186;
+    margin-bottom: 5px;
+  }
+  .spec b {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    color: #b9d7e6;
+  }
+  .spec b.ok { color: #6ee7c8; }
+  .spec b.warn { color: #ffc25c; }
+
+  /* ---------- 侧栏卡片 ---------- */
+  .card {
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: linear-gradient(170deg, #0d1620 0%, #0a1119 100%);
+    box-shadow: 0 24px 44px -34px rgba(0, 0, 0, .95);
+  }
+  .card + .card { margin-top: 18px; }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    color: #b9cee0;
+  }
+  .card-title::before {
+    content: "";
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--cyan), var(--violet));
+    box-shadow: 0 0 10px rgba(46, 230, 200, .6);
+  }
+  .card-title span { margin-left: auto; font-family: var(--mono); font-size: 9.5px; color: #5f7488; letter-spacing: .1em; }
+
+  .field { margin-bottom: 15px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 11.5px;
+    color: #8ea4b8;
+    letter-spacing: .04em;
+  }
+  .field-label b { color: #cfe6f5; font-weight: 600; font-family: var(--mono); font-size: 11px; }
+
+  .text-input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid #1e2c3b;
+    background: #070d13;
+    color: #e9fbff;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    letter-spacing: .04em;
+    outline: none;
+    transition: border-color .16s, box-shadow .16s;
+  }
+  .text-input:focus { border-color: rgba(46, 230, 200, .55); box-shadow: 0 0 0 3px rgba(46, 230, 200, .1); }
+  .meta-hint {
+    margin-top: 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .04em;
+    color: #5f7488;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .meta-hint.warn { color: var(--amber); }
+
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+  .chip {
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid #1e2c3b;
+    background: rgba(255, 255, 255, .02);
+    color: #8ea4b8;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover { color: #b6f4e8; border-color: rgba(46, 230, 200, .45); background: rgba(46, 230, 200, .07); }
+
+  .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 12px; color: #9fb4c7; }
+  .switch input { position: absolute; opacity: 0; pointer-events: none; }
+  .switch .track {
+    width: 40px; height: 22px;
+    border-radius: 999px;
+    background: #16222e;
+    border: 1px solid #223241;
+    position: relative;
+    transition: background .2s, border-color .2s;
+  }
+  .switch .knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #61798c;
+    transition: transform .2s, background .2s;
+  }
+  .switch input:checked + .track { background: rgba(46, 230, 200, .22); border-color: rgba(46, 230, 200, .5); }
+  .switch input:checked + .track .knob { transform: translateX(18px); background: var(--cyan); box-shadow: 0 0 10px rgba(46, 230, 200, .8); }
+
+  .seg {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid #1e2c3b;
+    background: #070d13;
+  }
+  .seg button {
+    border: 0;
+    background: transparent;
+    color: #7d92a6;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .seg button.active {
+    background: linear-gradient(180deg, rgba(46, 230, 200, .22), rgba(46, 230, 200, .08));
+    color: #b6f4e8;
+    box-shadow: inset 0 0 0 1px rgba(46, 230, 200, .3);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(46, 230, 200, .7), rgba(139, 126, 248, .5));
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: #eafdf8;
+    border: 2px solid #14b8a6;
+    box-shadow: 0 0 10px rgba(46, 230, 200, .7);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: #eafdf8;
+    border: 2px solid #14b8a6;
+    cursor: pointer;
+  }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* ---------- 串口控制台 ---------- */
+  .console {
+    height: 196px;
+    overflow-y: auto;
+    padding: 10px 11px;
+    border-radius: 12px;
+    border: 1px solid #16222e;
+    background: radial-gradient(120% 120% at 0% 0%, #08131a, #04080c 70%);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: #24384a transparent;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 15px);
+    mask-image: linear-gradient(180deg, transparent 0, #000 15px);
+  }
+  .console::-webkit-scrollbar { width: 6px; }
+  .console::-webkit-scrollbar-thumb { background: #24384a; border-radius: 3px; }
+  .ln { white-space: pre-wrap; word-break: break-all; }
+  .ln .t { color: #3f5566; }
+  .ln-cmd .m { color: #7dd3fc; }
+  .ln-ok .m { color: #55e08c; }
+  .ln-warn .m { color: #ffc25c; }
+  .ln-info .m { color: #93a9bd; }
+  .ln-sys .m { color: #a99bfb; }
+
+  .console-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 11px;
+    border-radius: 10px;
+    border: 1px solid #1a2734;
+    background: #060c12;
+  }
+  .console-input span { color: var(--cyan); font-family: var(--mono); font-size: 12px; }
+  .console-input input {
+    flex: 1;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #d6f5ee;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .03em;
+  }
+  .console-input input::placeholder { color: #3f5566; }
+
+  /* ---------- 操作指引 ---------- */
+  .usage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 2px 0;
+  }
+  .usage span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px 7px 8px;
+    border-radius: 999px;
+    border: 1px solid #1b2836;
+    background: rgba(11, 19, 28, .8);
+    color: #8ca1b5;
+    font-size: 11.5px;
+  }
+  .usage b {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(46, 230, 200, .14);
+    color: #6ee7d6;
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+
+  footer {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 11px;
+    color: #4d6172;
+    letter-spacing: .05em;
+  }
+  footer code { color: #7f97aa; font-family: var(--mono); }
+
+  @media (max-width: 980px) {
+    body { padding: 18px 14px 40px; }
+    .layout { grid-template-columns: 1fr; }
+    .title-main { font-size: 21px; }
+    .board { padding: 16px 14px; }
+    .hwbtn { min-width: 92px; padding: 11px 14px; }
+  }
+</style>
+</head>
+<body data-page-node-id="99UZXHkpxkEtx2YhM3oTQA">
+<div data-page-node-id="XQ24BFDc0oaXIEFYc3xeTV" class="page">
+
+  <header data-page-node-id="wlEnEQvCqCArifqNmbI3uT" class="topbar">
+    <div data-page-node-id="bc9aKxm5AVlEIPWej1EMYU">
+      <h1 data-page-node-id="wDZcLhmIQ4bY5AlNvuLJX9" class="title-main"><!--pnid:5Vi2GiV58TeKz3ZO346ciR-->星闪开发板简易仿真器</h1>
+      <p data-page-node-id="UIkaoUN61X5XzDBLO95sJ5" class="title-sub"><!--pnid:zwHOhYBikIlAPthG2NEQFm-->NEARLINK WS63 DEVKIT · <b data-page-node-id="0qEFI518KKf5cwFgEqOLYi"><!--pnid:KTGfLBGGqYk3t485ZB6XJr-->点阵 LED</b><!--pnid:1hoORtdrFGbZN4yLGmPGKm--> / <b data-page-node-id="SnSsyIvxTFJcoQu8kkQ8mf"><!--pnid:Q9U3zUjfwnQB9fuDUkX0gC-->编译烧录</b><!--pnid:r6WFWi1otnLQ4sxS8g0qjf--> / <b data-page-node-id="KB4kxxG4eV5XE08XoqhFXv"><!--pnid:OAGgFPGmGRtXD67RmqS9PU-->串口控制台</b><!--pnid:Ci0aDjgUPIY5VY44U5K5ob--> 全流程模拟</p>
+    </div>
+    <div data-page-node-id="DbczodXP7lOACgXSLSLUnb" class="badges">
+      <span data-page-node-id="Z1itU7WV8Xo6eSNefEqBp7" class="badge"><i data-page-node-id="oIOH7DNjlFXfuELzc37Zhr"></i><!--pnid:XXhlNmrMZDd89Cy7qQv2K0-->WS63 · SLE</span>
+      <span data-page-node-id="SR42bzYjG2S33L5RNZMxcy" class="badge violet"><i data-page-node-id="c79W3Y38SSgIgaNkp1rCWl"></i><!--pnid:yVQUSSAAQQtyeLkKIuZoty-->64 × 16 DOT MATRIX</span>
+    </div>
+  </header>
+
+  <div data-page-node-id="dxw8sOk65ScOnIx5RJDc9M" class="layout">
+
+    <!--pnid:0ogllKQISmNhN6wy34EZJO--><!-- ============ 开发板 ============ -->
+    <section data-page-node-id="5oHxutYrkZtRkJjsrs2196" class="board-card">
+      <div data-page-node-id="dV4APZI5S0drY2FlUkRQ6D" class="board">
+        <span data-page-node-id="3NiMS8njkZsdvfMVgx6VeX" class="screw tl"></span>
+        <span data-page-node-id="7svRlh9fsSiIkyZKh0by5z" class="screw tr"></span>
+        <span data-page-node-id="RhSIrgszLUUUanqzoPSyeH" class="screw bl"></span>
+        <span data-page-node-id="rsI9RhyPz8Eory1ktIhtkP" class="screw br"></span>
+
+        <div data-page-node-id="4x4va2F2DFdYKPdvfOsuPl" class="board-head">
+          <div data-page-node-id="63ZJZy8mbkGkbOzAKAFqi3" class="brand">
+            <span data-page-node-id="rH3ocdW90CPeJ0K7mMzZ0T" class="brand-mark">
+              <svg data-page-node-id="eZCAA1eF30VZk0sy8qfBTs" fill="none" stroke="#2ee6c8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                <path data-page-node-id="PVszLzuuro41m1z9XwDeU1" d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>
+                <circle data-page-node-id="6wG3Pefo8roeaY8KhAkDy0" cx="12" cy="12" r="3.2"/>
+              </svg>
+            </span>
+            <span data-page-node-id="IEhlyPpWczwtvcMjUv4QLd">
+              <span data-page-node-id="XIz6flkT18JPggeGk0JoI9" class="brand-name"><!--pnid:hlcQxd7Pw5nyTNGXs5Jwj5-->STARLINK · WS63</span>
+              <span data-page-node-id="ZpV38QXMyVmFnRmivk67N5" class="brand-sub"><!--pnid:SXJRlhWXxYDciqdH57ZUhP-->NEARLINK DEV KIT / REV 1.0</span>
+            </span>
+          </div>
+
+          <div data-page-node-id="1pDJHgZodJxV6gzvEv1uAp" class="leds">
+            <div data-page-node-id="NI8DFMticVs6bl25Q6C1Og" class="led-item">
+              <i data-page-node-id="JGYHHZrXUoiTK62w18LghF" class="led led-pwr" data-state="on" id="ledPwr"></i>
+              <span data-page-node-id="8nOkhuw59U85HjJXtgjJKn" class="led-label"><!--pnid:mUAECqUFSe3iS0saWhoBt2-->PWR</span>
+            </div>
+            <div data-page-node-id="szMtLqEzmmylePpwaEhaym" class="led-item">
+              <i data-page-node-id="78HPCKXEWTxw64xLbwEpwq" class="led" data-state="off" id="ledSle"></i>
+              <span data-page-node-id="X8IBY1ONcBxTokafKePpFx" class="led-label"><!--pnid:FIxCq6KtO9zdYtyeLaRjb2-->SLE</span>
+            </div>
+            <div data-page-node-id="DSxRSuDI98lOo9USF2NCJJ" class="led-item">
+              <i data-page-node-id="6e2GxYzuZizxqDDNKXf8Lf" class="led" data-state="off" id="ledSys"></i>
+              <span data-page-node-id="9NUVtTVP24RRgOblHQjTVf" class="led-label"><!--pnid:ldQyTKNDXCLtkfSn5TrFFH-->SYS</span>
+            </div>
+          </div>
+        </div>
+
+        <div data-page-node-id="3a7jz79IVTPmh7Z5q9H24u" class="screen-module">
+          <div data-page-node-id="PRKBJZJJibesEnX55UFxUI" class="glass">
+            <canvas data-page-node-id="nmDGKtsqPXeHqg0qhwlKPJ" height="224" id="matrix" width="896"></canvas>
+          </div>
+          <div data-page-node-id="jdXOFL5everOcYXkjrRKnN" class="screen-meta">
+            <span data-page-node-id="fM0EeXcSlgC7hlRNhabQCB"><!--pnid:Mis5Aw99cBVfTPeShYcCUr-->P3 · 64×16 · LED MATRIX</span>
+            <span data-page-node-id="7fL9roDAB8tXjBuVJ5P973" class="state-pill idle" id="statePill"><!--pnid:KCJ4zh10YF6h0ITiIOeL8j-->未烧录</span>
+          </div>
+        </div>
+
+        <div data-page-node-id="K83e3c72Mz34o1xfGGHWIg" class="burn-row">
+          <span data-page-node-id="yKVh90O9mSk3rQyfIeGs0l" class="label" id="burnLabel"><!--pnid:R7jOU25lgfkIEGRNxNcBqv-->待机 / IDLE</span>
+          <span data-page-node-id="UXnd7VkDPQbZpEi5nKvnmS" class="burn-track"><span data-page-node-id="PSiX1URjovaSUJa9TSlA2u" class="burn-fill" id="burnFill"></span></span>
+          <span data-page-node-id="qlSj9Iu78CVdVYDM4FOmIS" class="burn-pct" id="burnPct"><!--pnid:DRnqQlDrkczT7Ied7OUYsx-->0%</span>
+        </div>
+
+        <div data-page-node-id="Qu4PZ6t003z2g6S1aUBSgS" class="board-foot">
+          <div data-page-node-id="Z9a2JSV5Rmct1yk1fvn5t2" class="chip-group">
+            <div data-page-node-id="wpcrWrIBzhiqE0jkByFz3B" class="chip-body"><!--pnid:YpjAPvJGryND6Z2pqDNCsB-->WS63<small data-page-node-id="y5c2ZesAcGBMvW7WawO5iZ"><!--pnid:nobriFzUKa9RCWn6kLu7Mz-->NearLink</small></div>
+            <div data-page-node-id="HmxJj5csP4dfk3OwoAECHT" class="chip-pins">
+              <i data-page-node-id="aWU2vMxU7k85KckZviogXd"></i><i data-page-node-id="G8VXkoUpKFiYDqsnGJ6JJ0"></i><i data-page-node-id="DgIGjmf9QTXmsLS1aj7lOH"></i><i data-page-node-id="gv0cXOaOnJOJkQX9iEywR4"></i><i data-page-node-id="ExXEqEolGV8V2VSsx3D1bF"></i><i data-page-node-id="3FqO2RlneVAjaS2sCqR750"></i>
+              <i data-page-node-id="2d2PnZ7dPfHqsyQnH2vUKm"></i><i data-page-node-id="kz3Itwy8GDE3JqLt2YGNca"></i><i data-page-node-id="x1FCen2iuJguih8RwQ3zwW"></i><i data-page-node-id="r1piHdJDPBpnEogFrzetKM"></i><i data-page-node-id="rs9rh2u5FcL2LE89U41127"></i><i data-page-node-id="jBVN2tgD4HaZ44HgSDvBhg"></i>
+            </div>
+          </div>
+
+          <div data-page-node-id="S5xdYgkC1ABWCacnmq0y7e">
+            <div data-page-node-id="nPBQqVKStBcxs0an5lDrsn" class="btn-group">
+              <button data-page-node-id="Z5eACMbID2UPTtWuLJdCUU" class="hwbtn flash" id="btnFlash" type="button">
+                <span data-page-node-id="egX43sZogB2EBjsB0YwXSD" class="ico"><!--pnid:QhZsAJJcNt1aVf5N9y8e6U-->⚡</span><span data-page-node-id="l9RvDaYeCG8ya0Q8vnvYY2"><!--pnid:BzV4AV6CurgyAriN7FXB1f-->烧录</span>
+              </button>
+              <button data-page-node-id="xnJpqJKq0j7Lm9c2ojSVdh" class="hwbtn" id="btnReset" type="button">
+                <span data-page-node-id="k24W8Y2JXiLlvAsLIoXASl" class="ico"><!--pnid:NVECs1x2ZMQx2FAixtQF5j-->↺</span><span data-page-node-id="3IaFtn0hMtGGU6oxKXnDnY"><!--pnid:LpG3zYO0mOMw6wlqNikGd9-->复位</span>
+              </button>
+            </div>
+            <div data-page-node-id="AIGYfBbB53QhzsxKCwaxEf" class="foot-label"><!--pnid:t3IawZARxzPwhngkdfBKCx-->FLASH / BOOT &nbsp;·&nbsp; RST</div>
+          </div>
+        </div>
+      </div>
+
+      <div data-page-node-id="y8lFX12i2vO1JQqnYfPeNR" class="board-specs">
+        <div data-page-node-id="A15O8nBWEE1TfNhe0LAhPL" class="spec">
+          <span data-page-node-id="z8yLqOx48msBFZ0hU4lTFK"><!--pnid:BxdPWmCWekNtfa2Eq8jgKw-->TARGET</span>
+          <b data-page-node-id="6dBGYix2VbQd2WeCXctGmL"><!--pnid:ZiHWqTFJ7nEn10lg8pXNUX-->WS63 · SLE 1.0</b>
+        </div>
+        <div data-page-node-id="keHfANk7qFJpYhJWahaeyB" class="spec">
+          <span data-page-node-id="SDAwvfJPLeDSd1Ca8uiok0"><!--pnid:3VuCScntD02INIWlLpUnaN-->FIRMWARE</span>
+          <b data-page-node-id="JUwCkfXIeFcRxwfEyjhQRE" id="specFw"><!--pnid:2lDUhJyC1hCMnjQgYLbOin-->未烧录</b>
+        </div>
+        <div data-page-node-id="CZwtrbQhQK5hpnHuGpGN3y" class="spec">
+          <span data-page-node-id="IOnn2NwZnGennBL6MsdGOf"><!--pnid:iIiDmPMnSIQ3HbZf3e8FzT-->LINK</span>
+          <b data-page-node-id="bS2MAdt5o2cRJ6hEeWSHbZ" id="specLink"><!--pnid:CkcA06eOsHE11EMf7K1s6W-->未连接</b>
+        </div>
+        <div data-page-node-id="QpzCjyDizjg9B4VPKoYewz" class="spec">
+          <span data-page-node-id="IQmYpOi0CtzuozUClOJ6vg"><!--pnid:CoPlzDpcZp5KHeYvtcdh7V-->UPTIME</span>
+          <b data-page-node-id="GBy4vH7JZKLJa7lQOdkQcI" id="specUp"><!--pnid:kKSdHKifv3eJmfSKVRTOwR-->00:00</b>
+        </div>
+      </div>
+
+      <div data-page-node-id="z1NlfEvBkG9qUC9BCCV50B" class="usage">
+        <span data-page-node-id="19YFzAAZQmfCRgs9eGc1pt"><b data-page-node-id="heiKOrXidprygDc55FH7d5"><!--pnid:7MSjqKLD4WVaUIXV7s70qp-->1</b><!--pnid:qIMONywZTNLy84Dd99E0ew-->点击「烧录」→ 编译提示 + 烧录动画</span>
+        <span data-page-node-id="XwW8lC7MKULUPlBtKNuB2o"><b data-page-node-id="uEVrHjns5DycO5hNOoaZmv"><!--pnid:Vd2HSFVlnMMGERXUxoadJG-->2</b><!--pnid:EpZMEsQYQBVUKOCblDL98E-->修改文字 → 屏幕实时刷新</span>
+        <span data-page-node-id="qQGmXBESJUrzNkSHNFb6KE"><b data-page-node-id="WyJ2VHOkCS09J0HUcbqJbW"><!--pnid:U0nJZHWTUgnq9nRS6VGlXN-->3</b><!--pnid:9rRdMJ9L2Gc4LXJFeBZrBj-->点击「复位」→ 清屏回到上电状态</span>
+      </div>
+    </section>
+
+    <!--pnid:cP3qvPb5gQrFf4IVv3tsNJ--><!-- ============ 控制区 ============ -->
+    <aside data-page-node-id="3YSnHD9EjmorlV3O2lkK1O" class="side">
+
+      <div data-page-node-id="LkIFuGAsPjk54CaMcLAlTD" class="card">
+        <h2 data-page-node-id="swG39qImB7hK8DFFwCOGfP" class="card-title"><!--pnid:5PJjprh33TCTiMYyyBrEmX-->显示设置 <span data-page-node-id="mS6EfJ05lVoV8DacK3Xkjn"><!--pnid:v97c9z32d4B136qP7xucVG-->TEXT / PANEL</span></h2>
+
+        <div data-page-node-id="VoL6pBm97u5Ej18q8ufRVz" class="field">
+          <label data-page-node-id="rQfafnTAHVItDJyw6VSyYr" class="field-label" for="textInput"><!--pnid:qkvrPFVeC5c6v3bOFmo7zd-->显示文字 <b data-page-node-id="1JPnaoZoZOPQkhNM0RJ8k2" id="charCount"><!--pnid:jugcd4dL7gbaHTBclxMCmn-->0 字符</b></label>
+          <input data-page-node-id="5Zmk18oCV20k1pMKtAnt22" autocomplete="off" class="text-input" id="textInput" maxlength="48" placeholder="输入要显示的文字（ASCII）" spellcheck="false" type="text" value="hollowold">
+          <div data-page-node-id="VrSOVjTOQyUOapw5s6IvYg" class="meta-hint" id="textHint">
+            <span data-page-node-id="24KoN0ODIEa0J2Y9XG2ItE"><!--pnid:dYMrvaCx2MtvlH92Ojpeiq-->字模 5×7 · 字距 1 列</span>
+            <span data-page-node-id="DrkPnYnCweuE7O9hYSNeLj" id="widthInfo"><!--pnid:aiCgbSGDIrH0Ypfd7pecVn-->53 / 64 列</span>
+          </div>
+          <div data-page-node-id="7xPrx42TTHIATKcg9kzq6J" class="chips">
+            <button data-page-node-id="ZcQrwxpOCSlYULPIGFDQup" class="chip" data-text="hollowold" type="button"><!--pnid:FSRd3t0PRhMHLPfca3B7Sf-->hollowold</button>
+            <button data-page-node-id="MXPbRa1oP5DWxOHjpYdJIe" class="chip" data-text="helloworld" type="button"><!--pnid:rKIHohVrl2tOBIJ7YKcJVE-->helloworld</button>
+            <button data-page-node-id="FmNDu4ZpAJIDhUDmtFKaaF" class="chip" data-text="HELLO WS63" type="button"><!--pnid:OgQq4toGcz6OssOpEJBtja-->HELLO WS63</button>
+            <button data-page-node-id="TsWx1mWGf46XEP6ip9gJBr" class="chip" data-text="STARLINK 2026" type="button"><!--pnid:Arv6vfPDqMbF3LvZOeNvyJ-->STARLINK 2026</button>
+          </div>
+        </div>
+
+        <div data-page-node-id="bt3xhqKPAXadhSJ43i9g0b" class="field row">
+          <span data-page-node-id="iLeVooc6a9E2uNZyYWoULN" class="field-label" style="margin:0"><!--pnid:pa0vUNjdqMv0kfEFsOZF2h-->滚动字幕</span>
+          <label data-page-node-id="pTvRDoHQlyxaduGhsIA3El" class="switch">
+            <input data-page-node-id="hj3Px0pAB37JcRmHpXCuVQ" id="scrollTgl" type="checkbox">
+            <span data-page-node-id="rYNADACyqTVV3fKgsdZJWo" class="track"><span data-page-node-id="KUWgBbMT9d11XvF1dlzRnF" class="knob"></span></span>
+          </label>
+        </div>
+
+        <div data-page-node-id="lytQIB7ElBt1H3tYuSty2b" class="field">
+          <label data-page-node-id="sbc8wko489WpsNc86dmjZC" class="field-label" for="brightness"><!--pnid:kq9dL0QbFTWH4aAwWIAoQA-->亮度 <b data-page-node-id="KOXqNQNw5U1wOnJG68oXKh" id="brightVal"><!--pnid:C9ZXum29alDEZk9uvutTId-->80%</b></label>
+          <input data-page-node-id="EUqSXg8RPLBJg53AYyl5Ov" id="brightness" max="100" min="20" step="1" type="range" value="80">
+        </div>
+
+        <div data-page-node-id="LZt13SEOx3gkdGLOL8fKDO" class="field row">
+          <span data-page-node-id="ixW06cZK896gbwwpPXdIUS" class="field-label" style="margin:0"><!--pnid:2KnVekXidgoJYk1DuOPBHX-->点阵样式</span>
+          <div data-page-node-id="x5SV6VdgELat0FIsTWYzgD" class="seg" id="shapeSeg">
+            <button data-page-node-id="32bcVQM1DTbVYRRn7hJUbJ" class="active" data-shape="round" type="button"><!--pnid:AvbxGCaxjYTYmtmML5bGsr-->圆点</button>
+            <button data-page-node-id="dkwynkNYbDlEMfB671GUQi" data-shape="square" type="button"><!--pnid:W22313iUQzZSbAJNxnYPXh-->方块</button>
+          </div>
+        </div>
+      </div>
+
+      <div data-page-node-id="7OhOCblH167Vn7mwnlKyfA" class="card">
+        <h2 data-page-node-id="yBx5XXvNIFJB2QnqEtBQaF" class="card-title"><!--pnid:T8OYrNmJWSmBTRWmHa9Xyh-->串口控制台 <span data-page-node-id="ymBAyAU2W9Hedb553yTPUN"><!--pnid:9MagiDAbfALLXLILVCuiqu-->SERIAL · 115200</span></h2>
+        <div data-page-node-id="VCgcxIeWu7LPMqsd6PsbJj" class="console" id="consoleBox"></div>
+        <div data-page-node-id="jupq6uWXq9gzw1rgGp4kmB" class="console-input">
+          <span data-page-node-id="yhBcAghH1xD9uJSDXuf1GO"><!--pnid:GtPX5t6eUfmCTFA3AqD4QI-->›</span>
+          <input data-page-node-id="EGRnfXjJRNNCYDGbu7baMx" autocomplete="off" id="cmdInput" placeholder="输入指令，例如 help / text hello / flash" spellcheck="false" type="text">
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <footer data-page-node-id="6AeMvjSs5Qx0mM619CluFz"><!--pnid:hhZZbe5wnHsiArCyunn1Jc-->核心点阵渲染逻辑为原生 Canvas 手写 · 仅模拟交互流程，不含真实星闪通信 · <code data-page-node-id="E6fHcFYLVh3vrzA1sLmo5z" data-pnid-children="KtfeX5bKuK0FZMZQUDq6JV">HTML + CSS + JavaScript</code></footer>
+</div>
+
+<script data-page-node-id="Elgb6MDWGn8IGjCANN39lN" data-pnid-children="sNzfBktawvEzTZkvH6uJKA">
+(function () {
+  "use strict";
+
+  /* =====================================================================
+   * 1. 硬件参数与内置点阵字模（5×7，'1' 表示点亮）
+   * ===================================================================== */
+  var COLS = 64;          // 点阵列数
+  var ROWS = 16;          // 点阵行数
+  var ADV = 6;            // 每个字符占 6 列（5 列字模 + 1 列字距）
+  var GLYPH_ROWS = 7;
+
+  var FONT_SRC = {
+    " ": "00000/00000/00000/00000/00000/00000/00000",
+    "A": "01110/10001/10001/11111/10001/10001/10001",
+    "B": "11110/10001/10001/11110/10001/10001/11110",
+    "C": "01110/10001/10000/10000/10000/10001/01110",
+    "D": "11110/10001/10001/10001/10001/10001/11110",
+    "E": "11111/10000/10000/11110/10000/10000/11111",
+    "F": "11111/10000/10000/11110/10000/10000/10000",
+    "G": "01110/10001/10000/10111/10001/10001/01111",
+    "H": "10001/10001/10001/11111/10001/10001/10001",
+    "I": "01110/00100/00100/00100/00100/00100/01110",
+    "J": "00111/00010/00010/00010/00010/10010/01100",
+    "K": "10001/10010/10100/11000/10100/10010/10001",
+    "L": "10000/10000/10000/10000/10000/10000/11111",
+    "M": "10001/11011/10101/10101/10001/10001/10001",
+    "N": "10001/11001/10101/10011/10001/10001/10001",
+    "O": "01110/10001/10001/10001/10001/10001/01110",
+    "P": "11110/10001/10001/11110/10000/10000/10000",
+    "Q": "01110/10001/10001/10001/10101/10010/01101",
+    "R": "11110/10001/10001/11110/10100/10010/10001",
+    "S": "01111/10000/10000/01110/00001/00001/11110",
+    "T": "11111/00100/00100/00100/00100/00100/00100",
+    "U": "10001/10001/10001/10001/10001/10001/01110",
+    "V": "10001/10001/10001/10001/10001/01010/00100",
+    "W": "10001/10001/10001/10101/10101/11011/10001",
+    "X": "10001/10001/01010/00100/01010/10001/10001",
+    "Y": "10001/10001/01010/00100/00100/00100/00100",
+    "Z": "11111/00001/00010/00100/01000/10000/11111",
+
+    "a": "00000/00000/01110/00001/01111/10001/01111",
+    "b": "10000/10000/11110/10001/10001/10001/11110",
+    "c": "00000/00000/01111/10000/10000/10000/01111",
+    "d": "00001/00001/01111/10001/10001/10001/01111",
+    "e": "00000/00000/01110/10001/11111/10000/01110",
+    "f": "00110/01001/01000/11100/01000/01000/01000",
+    "g": "00000/00000/01111/10001/01111/00001/01110",
+    "h": "10000/10000/11110/10001/10001/10001/10001",
+    "i": "00100/00000/01100/00100/00100/00100/00111",
+    "j": "00010/00000/00110/00010/00010/10010/01100",
+    "k": "10000/10000/10010/10100/11000/10100/10010",
+    "l": "01100/00100/00100/00100/00100/00100/00111",
+    "m": "00000/00000/11010/10101/10101/10101/10101",
+    "n": "00000/00000/11110/10001/10001/10001/10001",
+    "o": "00000/00000/01110/10001/10001/10001/01110",
+    "p": "00000/00000/11110/10001/11110/10000/10000",
+    "q": "00000/00000/01111/10001/01111/00001/00001",
+    "r": "00000/00000/10110/11001/10000/10000/10000",
+    "s": "00000/00000/01111/10000/01110/00001/11110",
+    "t": "01000/01000/11100/01000/01000/01001/00110",
+    "u": "00000/00000/10001/10001/10001/10011/01101",
+    "v": "00000/00000/10001/10001/10001/01010/00100",
+    "w": "00000/00000/10001/10001/10101/10101/01010",
+    "x": "00000/00000/10001/01010/00100/01010/10001",
+    "y": "00000/00000/10001/10001/01111/00001/01110",
+    "z": "00000/00000/11111/00010/00100/01000/11111",
+
+    "0": "01110/10001/10011/10101/11001/10001/01110",
+    "1": "00100/01100/00100/00100/00100/00100/01110",
+    "2": "01110/10001/00001/00010/00100/01000/11111",
+    "3": "11111/00010/00100/00010/00001/10001/01110",
+    "4": "00010/00110/01010/10010/11111/00010/00010",
+    "5": "11111/10000/11110/00001/00001/10001/01110",
+    "6": "00110/01000/10000/11110/10001/10001/01110",
+    "7": "11111/00001/00010/00100/01000/01000/01000",
+    "8": "01110/10001/10001/01110/10001/10001/01110",
+    "9": "01110/10001/10001/01111/00001/00010/01100",
+
+    ".": "00000/00000/00000/00000/00000/01100/01100",
+    ",": "00000/00000/00000/00000/01100/00100/01000",
+    ":": "00000/01100/01100/00000/01100/01100/00000",
+    ";": "00000/01100/01100/00000/01100/00100/01000",
+    "!": "00100/00100/00100/00100/00100/00000/00100",
+    "?": "01110/10001/00001/00010/00100/00000/00100",
+    "-": "00000/00000/00000/11111/00000/00000/00000",
+    "+": "00000/00100/00100/11111/00100/00100/00000",
+    "/": "00001/00010/00010/00100/01000/01000/10000",
+    "=": "00000/00000/11111/00000/11111/00000/00000",
+    "_": "00000/00000/00000/00000/00000/00000/11111",
+    "(": "00010/00100/01000/01000/01000/00100/00010",
+    ")": "01000/00100/00010/00010/00010/00100/01000",
+    "%": "11001/11010/00010/00100/01000/01011/10011",
+    "*": "00000/10101/01110/11111/01110/10101/00000",
+    "'": "00100/00100/00000/00000/00000/00000/00000",
+    "\"": "01010/01010/00000/00000/00000/00000/00000",
+    "<": "00010/00100/01000/10000/01000/00100/00010",
+    ">": "01000/00100/00010/00001/00010/00100/01000",
+    "#": "01010/01010/11111/01010/11111/01010/01010",
+    "@": "01110/10001/10111/10101/10111/10000/01110",
+    "&": "01100/10010/10100/01000/10101/10010/01101"
+  };
+
+  // 预解析成行数组，绘制时直接取用
+  var GLYPHS = {};
+  Object.keys(FONT_SRC).forEach(function (k) {
+    GLYPHS[k] = FONT_SRC[k].split("/");
+  });
+  var FALLBACK = GLYPHS["?"];
+
+  function glyphOf(ch) {
+    return GLYPHS[ch] || FALLBACK;
+  }
+
+  /* =====================================================================
+   * 2. 全局状态
+   * ===================================================================== */
+  var state = {
+    text: "hollowold",
+    brightness: 80,          // 20 ~ 100
+    shape: "round",          // round | square
+    scroll: false,
+    flashed: false,          // 是否已烧录（决定屏幕是否有内容）
+    busy: false,             // 烧录/复位进行中
+    mode: "idle",            // idle | burn | text
+    progress: 0,
+    offset: 0,               // 滚动偏移（列）
+    buffer: new Uint8Array(COLS * ROWS)
+  };
+
+  var SCROLL_SPEED = 14;     // 滚动速度：列 / 秒
+
+  /* =====================================================================
+   * 3. 点阵帧缓冲绘制
+   * ===================================================================== */
+  function clearBuffer() {
+    state.buffer.fill(0);
+  }
+
+  // v: 1 = 普通点亮，2 = 高亮（进度条头部）
+  function plot(col, row, v, wrap) {
+    if (row < 0 || row >= ROWS) return;
+    if (wrap) {
+      col = ((col % COLS) + COLS) % COLS;
+    } else if (col < 0 || col >= COLS) {
+      return;
+    }
+    var idx = row * COLS + col;
+    if (v > state.buffer[idx]) state.buffer[idx] = v;
+  }
+
+  // 在 (x, y) 处以左上角为原点绘制字符串
+  function drawString(str, x, y, wrap) {
+    for (var i = 0; i < str.length; i++) {
+      var g = glyphOf(str.charAt(i));
+      var gx = x + i * ADV;
+      if (!wrap && (gx > COLS || gx + ADV < 0)) continue;
+      for (var r = 0; r < GLYPH_ROWS; r++) {
+        var rowBits = g[r];
+        for (var c = 0; c < 5; c++) {
+          if (rowBits.charAt(c) === "1") plot(gx + c, y + r, 1, wrap);
+        }
+      }
+    }
+  }
+
+  function textWidth(str) {
+    return str.length * ADV - 1;
+  }
+
+  // —— 烧录过程中：数字百分比 + 进度条 ——
+  function drawBurnFrame() {
+    var pct = Math.max(0, Math.min(100, Math.round(state.progress)));
+    var label = pct + "%";
+    var lw = textWidth(label);
+    drawString(label, Math.floor((COLS - lw) / 2), 1, false);
+
+    // 外框
+    var bx0 = 4, bx1 = COLS - 5, by0 = 10, by1 = 14;
+    for (var c = bx0; c <= bx1; c++) {
+      plot(c, by0, 1, false);
+      plot(c, by1, 1, false);
+    }
+    for (var r = by0; r <= by1; r++) {
+      plot(bx0, r, 1, false);
+      plot(bx1, r, 1, false);
+    }
+    // 内部填充
+    var inner = bx1 - bx0 - 1;
+    var filled = Math.round(inner * (pct / 100));
+    for (var i = 0; i < filled; i++) {
+      for (var rr = by0 + 1; rr < by1; rr++) {
+        plot(bx0 + 1 + i, rr, 1, false);
+      }
+    }
+    // 头部高亮
+    if (filled > 0 && filled < inner) {
+      for (var rr2 = by0 + 1; rr2 < by1; rr2++) {
+        plot(bx0 + 1 + filled, rr2, 2, false);
+      }
+    }
+  }
+
+  // —— 正常显示：居中或跑马灯 ——
+  function drawTextFrame(dt) {
+    var str = state.text.length ? state.text : " ";
+    var w = textWidth(str);
+    var scrolling = state.scroll && w > COLS;
+
+    if (scrolling) {
+      var total = w + 12;                       // 首尾留白，循环更自然
+      state.offset = (state.offset + dt * SCROLL_SPEED) % total;
+      drawString(str, Math.round(-state.offset), 4, true);
+    } else {
+      state.offset = 0;
+      drawString(str, Math.round((COLS - w) / 2), 4, false);
+    }
+  }
+
+  /* =====================================================================
+   * 4. Canvas 上色（熄灭点 / 发光点 / 高亮点芯）
+   * ===================================================================== */
+  var canvas = document.getElementById("matrix");
+  var ctx = canvas.getContext("2d");
+  var STEP = canvas.width / COLS;   // 每颗灯珠的像素间距
+
+  function dotPath(x, y, size, round) {
+    if (round) {
+      ctx.moveTo(x + size / 2, y);
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+    } else {
+      ctx.rect(x, y, size, size);
+    }
+  }
+
+  function paint() {
+    var W = canvas.width, H = canvas.height;
+    var br = state.brightness / 100;
+    var round = state.shape === "round";
+
+    // 屏幕底色（中间略亮的玻壳感）
+    var bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.62);
+    bg.addColorStop(0, "#08151a");
+    bg.addColorStop(1, "#03090b");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    var offSize = STEP * (round ? 0.58 : 0.56);
+    var onSize = STEP * (round ? 0.72 : 0.68);
+
+    // —— 熄灭的点阵：暗色基底，让面板有"灯珠"质感 ——
+    ctx.beginPath();
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        if (state.buffer[r * COLS + c]) continue;
+        var x = c * STEP + (STEP - offSize) / 2;
+        var y = r * STEP + (STEP - offSize) / 2;
+        dotPath(x, y, offSize, round);
+      }
+    }
+    ctx.fillStyle = "rgba(120, 190, 190, 0.10)";
+    ctx.fill();
+
+    // —— 点亮的灯珠：整块路径一次性填充 + 阴影发光 ——
+    ctx.save();
+    ctx.beginPath();
+    for (var r2 = 0; r2 < ROWS; r2++) {
+      for (var c2 = 0; c2 < COLS; c2++) {
+        if (state.buffer[r2 * COLS + c2] !== 1) continue;
+        var x2 = c2 * STEP + (STEP - onSize) / 2;
+        var y2 = r2 * STEP + (STEP - onSize) / 2;
+        dotPath(x2, y2, onSize, round);
+      }
+    }
+    ctx.shadowColor = "rgba(46, 230, 200, " + (0.45 + 0.45 * br) + ")";
+    ctx.shadowBlur = STEP * (0.5 + 1.0 * br);
+    ctx.fillStyle = "rgba(38, 216, 194, " + (0.30 + 0.55 * br) + ")";
+    ctx.fill();
+    ctx.restore();
+
+    // —— 高亮点（进度条头部）：偏白的热点 ——
+    var hotCount = 0;
+    for (var i = 0; i < state.buffer.length; i++) if (state.buffer[i] === 2) hotCount++;
+    if (hotCount) {
+      ctx.save();
+      ctx.beginPath();
+      for (var r3 = 0; r3 < ROWS; r3++) {
+        for (var c3 = 0; c3 < COLS; c3++) {
+          if (state.buffer[r3 * COLS + c3] !== 2) continue;
+          var x3 = c3 * STEP + (STEP - onSize) / 2;
+          var y3 = r3 * STEP + (STEP - onSize) / 2;
+          dotPath(x3, y3, onSize, round);
+        }
+      }
+      ctx.shadowColor = "rgba(210, 255, 250, " + (0.6 + 0.4 * br) + ")";
+      ctx.shadowBlur = STEP * 1.6;
+      ctx.fillStyle = "rgba(240, 255, 252, " + (0.55 + 0.4 * br) + ")";
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // —— 灯芯：让点亮的点更通透 ——
+    var coreSize = STEP * (round ? 0.34 : 0.30);
+    ctx.beginPath();
+    for (var r4 = 0; r4 < ROWS; r4++) {
+      for (var c4 = 0; c4 < COLS; c4++) {
+        var v = state.buffer[r4 * COLS + c4];
+        if (!v) continue;
+        var x4 = c4 * STEP + (STEP - coreSize) / 2;
+        var y4 = r4 * STEP + (STEP - coreSize) / 2;
+        dotPath(x4, y4, coreSize, round);
+      }
+    }
+    ctx.fillStyle = "rgba(224, 255, 249, " + (0.22 + 0.62 * br) + ")";
+    ctx.fill();
+  }
+
+  /* =====================================================================
+   * 5. 主循环
+   * ===================================================================== */
+  var lastT = 0;
+  function tick(now) {
+    if (!lastT) lastT = now;
+    var dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+
+    clearBuffer();
+    if (state.mode === "burn") {
+      drawBurnFrame();
+    } else if (state.mode === "text") {
+      drawTextFrame(dt);
+    }
+    paint();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* =====================================================================
+   * 6. DOM 引用
+   * ===================================================================== */
+  var $ = function (id) { return document.getElementById(id); };
+  var el = {
+    flash: $("btnFlash"),
+    reset: $("btnReset"),
+    text: $("textInput"),
+    charCount: $("charCount"),
+    widthInfo: $("widthInfo"),
+    hint: $("textHint"),
+    scroll: $("scrollTgl"),
+    bright: $("brightness"),
+    brightVal: $("brightVal"),
+    shapeSeg: $("shapeSeg"),
+    console: $("consoleBox"),
+    cmd: $("cmdInput"),
+    burnFill: $("burnFill"),
+    burnPct: $("burnPct"),
+    burnLabel: $("burnLabel"),
+    statePill: $("statePill"),
+    ledSle: $("ledSle"),
+    ledSys: $("ledSys")
+  };
+
+  /* =====================================================================
+   * 7. 串口控制台
+   * ===================================================================== */
+  var bootT = performance.now();
+  var MAX_LINES = 220;
+
+  function stamp() {
+    var d = (performance.now() - bootT) / 1000;
+    var mm = String(Math.floor(d / 60)).padStart(2, "0");
+    var ss = (d % 60).toFixed(3).padStart(6, "0");
+    return "[" + mm + ":" + ss + "]";
+  }
+
+  function serial(msg, type) {
+    type = type || "info";
+    var line = document.createElement("div");
+    line.className = "ln ln-" + type;
+    var t = document.createElement("span");
+    t.className = "t";
+    t.textContent = stamp() + " ";
+    var m = document.createElement("span");
+    m.className = "m";
+    m.textContent = msg;
+    line.appendChild(t);
+    line.appendChild(m);
+    el.console.appendChild(line);
+    while (el.console.childNodes.length > MAX_LINES) {
+      el.console.removeChild(el.console.firstChild);
+    }
+    el.console.scrollTop = el.console.scrollHeight;
+  }
+
+  function sleep(ms) {
+    return new Promise(function (res) { setTimeout(res, ms); });
+  }
+
+  /* =====================================================================
+   * 8. 状态同步
+   * ===================================================================== */
+  function setPill(text, cls) {
+    el.statePill.textContent = text;
+    el.statePill.className = "state-pill " + (cls || "");
+  }
+
+  function setProgress(pct, label) {
+    state.progress = pct;
+    el.burnFill.style.width = pct + "%";
+    el.burnPct.textContent = Math.round(pct) + "%";
+    if (label) el.burnLabel.textContent = label;
+  }
+
+  function syncBusy() {
+    el.flash.disabled = state.busy;
+    el.reset.disabled = state.busy;
+    el.flash.dataset.busy = state.busy ? "1" : "0";
+    el.flash.querySelector(".ico").textContent = state.busy ? "◌" : "⚡";
+  }
+
+  function updateTextMeta() {
+    var w = textWidth(state.text || " ");
+    el.charCount.textContent = (state.text.length) + " 字符";
+    el.widthInfo.textContent = w + " / " + COLS + " 列";
+    var over = w > COLS;
+    el.widthInfo.style.color = over && !state.scroll ? "#ffb43a" : "";
+    el.hint.classList.toggle("warn", over && !state.scroll);
+  }
+
+  /* =====================================================================
+   * 9. 烧录流程（编译提示 + 烧录动画 + 显示文字）
+   * ===================================================================== */
+  async function runFlash() {
+    if (state.busy) return;
+
+    state.busy = true;
+    state.flashed = false;
+    state.mode = "burn";
+    state.progress = 0;
+    state.offset = 0;
+    syncBusy();
+    setProgress(0, "编译中 / BUILD");
+    setPill("编译中", "burn");
+    el.ledSys.dataset.state = "blink";
+
+    serial("> build --target ws63 src/main.c", "cmd");
+    await sleep(180);
+    serial("clang -O2 -mcpu=... 解析源文件 main.c", "info");
+
+    for (var p = 0; p <= 30; p += 5) {
+      setProgress(p * 100 / 100, "编译中 / BUILD");
+      await sleep(55);
+    }
+    serial("编译完成：firmware.bin 4.28 KB  (0 error, 0 warning)", "ok");
+    await sleep(120);
+
+    serial("进入烧录模式，等待星闪设备握手 ...", "info");
+    setProgress(32, "等待握手 / HANDSHAKE");
+    el.ledSle.dataset.state = "blink";
+    await sleep(520);
+
+    serial("SLE 链路建立成功 · 速率 12 Mbps · RSSI -42 dBm", "ok");
+    el.ledSle.dataset.state = "on";
+    setPill("烧录中", "burn");
+    setProgress(46, "烧录中 / FLASHING");
+
+    for (var q = 48; q <= 100; q += 2) {
+      setProgress(q, "烧录中 / FLASHING");
+      await sleep(34);
+    }
+
+    serial("写入校验 CRC32 = 0x9A3C51E7  ... passed", "ok");
+    serial("烧录完成 (" + ((performance.now() - bootT) / 1000).toFixed(2) + "s)，应用已启动", "ok");
+    await sleep(260);
+
+    // 屏幕显示文字
+    state.mode = "text";
+    state.flashed = true;
+    state.busy = false;
+    state.offset = 0;
+    setProgress(100, "运行中 / RUNNING");
+    setPill("运行中", "run");
+    el.ledSys.dataset.state = "on";
+    syncBusy();
+
+    serial("显示缓冲区已刷新：" + JSON.stringify(state.text), "sys");
+    serial("提示：修改文字可实时刷新；点击「复位」清空屏幕。", "info");
+  }
+
+  /* =====================================================================
+   * 10. 复位流程
+   * ===================================================================== */
+  async function runReset() {
+    if (state.busy) return;
+    state.busy = true;
+    syncBusy();
+
+    serial("> reset --nrst", "cmd");
+    serial("拉低 NRST 引脚，系统复位 ...", "warn");
+    state.mode = "idle";
+    state.flashed = false;
+    state.offset = 0;
+    setPill("复位中", "burn");
+    el.ledSle.dataset.state = "off";
+    el.ledSys.dataset.state = "blink";
+    setProgress(0, "复位中 / RESET");
+    await sleep(420);
+
+    serial("bootloader v1.2.0 · PWR check ... ok", "info");
+    await sleep(220);
+    serial("点阵屏已清空，回到上电初始状态，等待烧录", "ok");
+
+    setPill("未烧录", "idle");
+    setProgress(0, "待机 / IDLE");
+    el.ledSys.dataset.state = "off";
+    state.busy = false;
+    syncBusy();
+  }
+
+  /* =====================================================================
+   * 11. 指令解析
+   * ===================================================================== */
+  function execCommand(raw) {
+    var line = raw.trim();
+    if (!line) return;
+    serial("> " + line, "cmd");
+
+    var parts = line.split(/\s+/);
+    var cmd = parts[0].toLowerCase();
+    var arg = line.slice(parts[0].length).trim();
+
+    switch (cmd) {
+      case "help":
+        serial("可用指令：", "sys");
+        serial("  help                显示本帮助", "info");
+        serial("  text <内容>          修改显示文字（ASCII）", "info");
+        serial("  flash               触发编译 + 烧录流程", "info");
+        serial("  reset               复位并清屏", "info");
+        serial("  bright <20-100>     设置亮度", "info");
+        serial("  scroll on|off       滚动字幕开关", "info");
+        serial("  shape round|square  点阵样式", "info");
+        serial("  status              查看当前状态", "info");
+        serial("  clear               清空控制台", "info");
+        break;
+
+      case "text":
+        if (!arg) { serial("用法：text <内容>", "warn"); break; }
+        setText(arg);
+        serial("显示内容已更新：" + JSON.stringify(arg), "ok");
+        break;
+
+      case "flash":
+        runFlash();
+        break;
+
+      case "reset":
+        runReset();
+        break;
+
+      case "bright":
+        var b = parseInt(arg, 10);
+        if (isNaN(b)) { serial("用法：bright <20-100>", "warn"); break; }
+        b = Math.max(20, Math.min(100, b));
+        el.bright.value = b;
+        state.brightness = b;
+        el.brightVal.textContent = b + "%";
+        serial("亮度 = " + b + "%", "ok");
+        break;
+
+      case "scroll":
+        if (arg === "on" || arg === "off") {
+          state.scroll = arg === "on";
+          el.scroll.checked = state.scroll;
+          updateTextMeta();
+          serial("滚动字幕 " + (state.scroll ? "已开启" : "已关闭"), "ok");
+        } else {
+          serial("用法：scroll on|off", "warn");
+        }
+        break;
+
+      case "shape":
+        if (arg === "round" || arg === "square") {
+          setShape(arg);
+          serial("点阵样式 = " + (arg === "round" ? "圆点" : "方块"), "ok");
+        } else {
+          serial("用法：shape round|square", "warn");
+        }
+        break;
+
+      case "status":
+        serial("固件状态：" + (state.flashed ? "运行中" : "未烧录"), "sys");
+        serial("文字：" + JSON.stringify(state.text) + " · " + textWidth(state.text || " ") + "/" + COLS + " 列", "info");
+        serial("亮度：" + state.brightness + "% · 滚动：" + (state.scroll ? "开" : "关") + " · 样式：" + state.shape, "info");
+        serial("SLE：" + (el.ledSle.dataset.state === "on" ? "已连接" : "未连接"), "info");
+        break;
+
+      case "clear":
+        el.console.innerHTML = "";
+        serial("控制台已清空", "sys");
+        break;
+
+      default:
+        serial("未知指令：" + cmd + "，输入 help 查看帮助", "warn");
+    }
+  }
+
+  /* =====================================================================
+   * 12. 交互绑定
+   * ===================================================================== */
+  function setText(v) {
+    state.text = v;
+    el.text.value = v;
+    updateTextMeta();
+    if (state.mode === "text") state.offset = 0;
+  }
+
+  function setShape(v) {
+    state.shape = v;
+    Array.prototype.forEach.call(el.shapeSeg.children, function (b) {
+      b.classList.toggle("active", b.dataset.shape === v);
+    });
+  }
+
+  el.flash.addEventListener("click", runFlash);
+  el.reset.addEventListener("click", runReset);
+
+  el.text.addEventListener("input", function () {
+    setText(el.text.value);
+  });
+
+  el.scroll.addEventListener("change", function () {
+    state.scroll = el.scroll.checked;
+    state.offset = 0;
+    updateTextMeta();
+    serial("滚动字幕 " + (state.scroll ? "开启" : "关闭"), "sys");
+  });
+
+  el.bright.addEventListener("input", function () {
+    state.brightness = parseInt(el.bright.value, 10);
+    el.brightVal.textContent = state.brightness + "%";
+  });
+
+  el.shapeSeg.addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    setShape(btn.dataset.shape);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".chip[data-text]"), function (b) {
+    b.addEventListener("click", function () {
+      setText(b.dataset.text);
+      serial("示例文字：" + JSON.stringify(b.dataset.text) +
+        (state.flashed ? " （已实时刷新）" : " （点击烧录后显示）"), "sys");
+    });
+  });
+
+  el.cmd.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      var v = el.cmd.value;
+      el.cmd.value = "";
+      execCommand(v);
+    }
+  });
+
+  /* =====================================================================
+   * 13. 上电启动日志
+   * ===================================================================== */
+  serial("NearLink DevKit WS63 · bootloader v1.2.0", "sys");
+  serial("SLE stack init ... ok  |  matrix driver 64x16 ... ok", "info");
+  serial("PWR / SYS 自检通过，屏幕处于上电初始状态（空屏）", "ok");
+  serial("输入 help 查看可用指令，点击「烧录」开始下载固件", "info");
+  updateTextMeta();
+  syncBusy();
+})();
+</script>
+</body>
+</html>
